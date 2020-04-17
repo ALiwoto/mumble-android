@@ -60,7 +60,7 @@
 
     <!-- Comment Fragment -->
     <string name="comment_view">View</string>
-    <string name="comment_edit_source">Eedit source</string>
+    <string name="comment_edit_source">Edit source</string>
     <string name="comment_view_source">View source</string>
     
     <!-- Server Info Fragment -->
