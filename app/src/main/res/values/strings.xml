@@ -147,7 +147,7 @@
     <string name="delete">Delete</string>
     <string name="retry">Retry</string>
     <string name="messageToUser">Type message to the user \'%s\'</string>
-    <string name="messageToChannel">Type message to the channel \'%s\' here</string>
+    <string name="messageToChannel">Type message to the \'%s\' channel here</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
     <string name="clearChat">Clear Chat</string>
@@ -155,7 +155,7 @@
     <string name="mumlaConnected">Mumla connected</string>
     <string name="mumlaConnecting">Mumla connecting…</string>
     <string name="mumlaDisconnected">Mumla disconnected</string>
-    <string name="lostConnection">connection to server lost.</string>
+    <string name="lostConnection">Lost connection to the \'%s\' server.</string>
     <string name="resume">Resume</string>
     <string name="channel">Channel</string>
     <string name="user">User</string>
