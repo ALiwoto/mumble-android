@@ -1,7 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <resources>
-  <!--Drawer pane-->
-<resources>
     <!-- Drawer pane -->
     <string name="drawer_open">Открыть меню</string>
     <string name="drawer_close">Закрыть меню</string>
