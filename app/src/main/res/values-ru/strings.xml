@@ -25,7 +25,7 @@
     <string name="user_menu_mute">Замутировать</string>
     <string name="user_menu_deafen">Заглушить</string>
     <string name="user_menu_move">Переместить</string>
-    <string name="user_menu_priority_speaker">Приоритетный голос</string>
+    <string name="user_menu_priority_speaker">Приоритетный спикер</string>
     <string name="user_menu_local_mute">Замутировать локально</string>
     <string name="user_menu_ignore_messages">Игнорировать сообщения</string>
     <string name="user_menu_change_comment">Изменить комментарий</string>
