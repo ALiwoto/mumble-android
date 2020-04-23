@@ -44,7 +44,6 @@
     <string name="acknowledgements">Acknowledgements</string>
     <string name="acknowledgementsSum">See who contributed to Mumla</string>
     <string name="licenses">Licenses</string>
-    <string name="copyright">Mumla is a fork of Plumble\nCopyright &#169; 2014–2017 Andrew Comminos\nCopyright &#169; 2020 Daniel Lublin mumla@lublin.se\n\nProject page: https://mumla-app.gitlab.io</string>
 
     <string name="authentication">Authentication</string>
     <string name="authenticationSum">Manage and create certificates</string>

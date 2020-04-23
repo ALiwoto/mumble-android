@@ -86,7 +86,7 @@
     <string name="deafen">Приглушить</string>
     <string name="disconnect">Отключиться</string>
     <string name="disconnectSure">Вы действительно хотите отключиться от %s?</string>
-    <string name="save">Созхранить</string>
+    <string name="save">Сохранить</string>
     <string name="add">Добавить</string>
     <string name="preferences">Параметры</string>
     <string name="togglelocalmute">Переключть локальный мут</string>
@@ -123,7 +123,7 @@
     <string name="connect">Подключиться</string>
     <string name="connectToServer">Подключиться к серверу</string>
     <string name="edit">Редактировать</string>
-    <string name="remove">Убрать</string>
+    <string name="remove">Удалить</string>
     <string name="delete">Удалить</string>
     <string name="retry">Повторить</string>
     <string name="messageToUser">Введите сообщение для пользователя \'%s\'</string>
