@@ -200,9 +200,7 @@
     <string name="userControl">用户控制</string>
     <string name="registerSelfSuccess">已发送注册请求</string>
     <string name="error_fetching_servers">无法获取服务器。\n您确定已连接互联网吗？</string>
-    <string name="coming_soon">该特性将很快实现。</string>
-    <string name="search_channel_users">%d 名用户</string>
-    <string name="reconnecting">将在 %d 秒内重新连接。</string>
+    <string name="coming_soon">该特性即将推出。</string>
     <string name="tapToReconnect">点击以重新连接</string>
     <string name="overlay">浮窗</string>
     <string name="hint_reason">原因</string>
@@ -258,7 +256,6 @@
     <string name="migration_certificate_success">证书已迁移。</string>
     <string name="error_writing_to_storage">无法写入外部存储。</string>
     <string name="export_success">已将证书导出为 %s。</string>
-    <string name="notification_unread_many">%d 条新消息</string>
     <string name="context_channel_link">链接</string>
     <string name="context_channel_unlink_all">取消全部链接</string>
     <string name="context_channel_shout">设置语音目标</string>
@@ -273,4 +270,14 @@
     <string name="orbot_not_installed">未安装 Orbot 应用。将不会使用 Tor。</string>
     <string name="orbot_tor_failed">无法连接到端口为 %d 的本地 Tor 代理服务器（SOCKS）。\n\n请确认 Orbot 已运行。</string>
     <string name="default_">默认</string>
+
+    <plurals name="search_channel_users">
+        <item quantity="other">%d 名用户</item>
+    </plurals>
+    <plurals name="reconnecting">
+        <item quantity="other">将在 %d 秒内重新连接。</item>
+    </plurals>
+    <plurals name="notification_unread_many">
+        <item quantity="other">%d 条新消息</item>
+    </plurals>
 </resources>
