@@ -599,7 +599,7 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
             	 */
 
             	// TODO These are likely incorrect as I lack access to Samsung's full SDK.
-            	int keyCode = intent.getStringExtra("KEY_CODE");
+            	String keyCode = intent.getStringExtra("KEY_CODE");
 				int keyReportType = intent.getIntExtra("KEY_REPORT_TYPE", 0);
 
 				if (keyCode == "KEYCODE_PTT" && keyReportType == 1) {
