@@ -609,9 +609,11 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
 				} else if (keyCode == "KEYCODE_PTT" && keyReportType == 2) {
 					mService.onTalkKeyDown();
 				} else if (keyCode == "KEYCODE_EMERGENCY" && keyReportType == 1) {
-					mService.onEmergencyKeyUp();
+				// Not functional yet.
+            	//mService.onEmergencyKeyUp();
 				} else if (keyCode == "KEYCODE_EMERGENCY" && keyReportType == 2) {
-					mService.onEmergencyKeyDown();
+				// Not functional yet.
+            	//mService.onEmergencyKeyDown();
 				}
             }
         }
