@@ -11,6 +11,7 @@ variables:
 
 include:
 - template: Security/License-Scanning.gitlab-ci.yml
+- template: Dependency-Scanning.gitlab-ci.yml
 - template: Security/SAST.gitlab-ci.yml
 
 before_script:
@@ -38,8 +39,6 @@ assembleDebug:
     - "../../gradlew jar"
     - popd
     - "./gradlew assembleDebug"
-    - "/run.sh analyze ."
-    - "/analyzer run"
   artifacts:
     paths:
     - app/build/outputs/apk/
@@ -55,7 +54,20 @@ assembleDebug:
 #   script:
 #     - ./gradlew -Pci --console=plain jacocoTestReport coveralls
 
+license_scanning:
+  script:
+    - pushd libraries/humla/libs/humla-spongycastle
+    - "../../gradlew jar"
+    - popd
+    - "./gradlew assembleDebug"
+  stage: test
+
 sast:
+  script:
+    - pushd libraries/humla/libs/humla-spongycastle
+    - "../../gradlew jar"
+    - popd
+    - "./gradlew assembleDebug"
   variables:
     SAST_EXCLUDED_ANALYZERS: bandit, brakeman, eslint, flawfinder, gosec, kubesec,
       nodejs-scan, phpcs-security-audit, pmd-apex, security-code-scan, sobelow
