@@ -19,9 +19,12 @@ package se.lublin.mumla.app;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -111,7 +114,22 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
      * If specified, the provided integer drawer fragment ID is shown when the activity is created.
      */
     public static final String EXTRA_DRAWER_FRAGMENT = "drawer_fragment";
+    
+    /** Handle pressed event of hardware's Push-To-Talk button. */
+    public BroadcastReceiver mPttDown = new onPttDown();
+    
+    /** Handle released event of hardware's Push-To-Talk button. */
+    public BroadcastReceiver mPttUp = new onPttUp();
+    
+    /** * Handle pressed event of hardware's 'SOS' or 'Emergency' button. */
+    public BroadcastReceiver mEmergencyDown = new onEmergencyDown();
+    
+    /** Handle released event of hardware's 'SOS' or 'Emergency' button. */
+    public BroadcastReceiver mEmergencyUp = new onEmergencyUp();
 
+    /** Handle released event of Samsung's XCover/Top button. */
+    public BroadcastReceiver mSamsungXCover = new onSamsungXCover();
+    
     private IMumlaService mService;
     private MumlaDatabase mDatabase;
     private Settings mSettings;
@@ -267,6 +285,37 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
+        
+        // Generic Android PTT intents.
+        registerReceiver(this.mPttDown, new IntentFilter("android.intent.action.PTT.down"));
+        registerReceiver(this.mPttUp, new IntentFilter("android.intent.action.PTT.up"));
+        //registerReceiver(this.mPttUp, new IntentFilter("com.kodiak.intent.action.PTT_BUTTON"));
+        
+        // Samsung Knox intent (requires special handling, see Samsung Knox docs).
+        registerReceiver(this.mSamsungXCover, new IntentFilter("com.samsung.android.knox.intent.action.HARD_KEY_REPORT"));
+        
+        // Zebra/Symbol intents (requires special handling, see Zebra docs).
+        //registerReceiver(this.mPttDown, new IntentFilter("com.symbol.button.L2"));
+        //registerReceiver(this.mPttUp, new IntentFilter("com.symbol.button.R2"));
+        
+        // Sonim intents.
+        registerReceiver(this.mPttDown, new IntentFilter("com.sonim.intent.action.PTT_KEY_DOWN"));
+        registerReceiver(this.mPttUp, new IntentFilter("com.sonim.intent.action.PTT_KEY_UP"));
+        //registerReceiver(this.mPttDown, new IntentFilter("com.sonim.intent.action.YELLOW_KEY_DOWN"));
+        //registerReceiver(this.mPttUp, new IntentFilter("com.sonim.intent.action.YELLOW_KEY_UP"));
+        registerReceiver(this.mEmergencyDown, new IntentFilter("com.sonim.intent.action.SOS_KEY_DOWN"));
+        registerReceiver(this.mEmergencyUp, new IntentFilter("com.sonim.intent.action.SOS_KEY_UP"));
+        //registerReceiver(this.mPttDown, new IntentFilter("com.sonim.intent.action.GREEN_KEY_DOWN"));
+        //registerReceiver(this.mPttUp, new IntentFilter("com.sonim.intent.action.GREEN_KEY_UP"));
+        
+        // Kyocera intent (requires special handling, see Kyocera docs).
+        //registerReceiver(this.mPttDown, new IntentFilter("com.kyocera.android.intent.action.PTT_BUTTON"));
+        
+        // Unknown (TMZP) intents.
+        registerReceiver(this.mPttDown, new IntentFilter("com.TMZP.Main.PTTDown"));
+        registerReceiver(this.mPttUp, new IntentFilter("com.TMZP.Main.PTTUp"));
+        registerReceiver(this.mEmergencyDown, new IntentFilter("com.TMZP.Main.SOSDown"));
+        registerReceiver(this.mEmergencyUp, new IntentFilter("com.TMZP.Main.SOSUp"));
 
         mDatabase = new MumlaSQLiteDatabase(this); // TODO add support for cloud storage
         mDatabase.open();
@@ -433,6 +482,12 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    /**
+     * Handle a user set Push-To-Talk key press event.
+     * @param keyCode What was the code of the key pressed?
+     * @param event The event sent by said key (eg. ACTION_UP).
+     * @return If the PTT key was pressed or not.
+     */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (mService != null && keyCode == mSettings.getPushToTalkKey()) {
@@ -442,6 +497,12 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         return super.onKeyDown(keyCode, event);
     }
 
+    /**
+     * Handle a user set Push-To-Talk key release event.
+     * @param keyCode What was the code of the key pressed?
+     * @param event The event sent by said key (eg. ACTION_UP).
+     * @return If the PTT key was pressed or not.
+     */
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (mService != null && keyCode == mSettings.getPushToTalkKey()) {
@@ -451,6 +512,109 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         return super.onKeyUp(keyCode, event);
     }
 
+    /**
+     * Handle a device's dedicated Push-To-Talk intent via a BroadcastRecevier.
+     * @author DarK_St3alth
+     * @see MumlaActivity.onKeyDown
+     */
+    public class onPttDown extends BroadcastReceiver {
+        public onPttDown() {}
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("android.intent.action.PTT.down")
+            		|| intent.getAction().equals("com.sonim.intent.action.PTT_KEY_DOWN")
+            		|| intent.getAction().equals("com.TMZP.Main.PTTDown"))) {
+                mService.onTalkKeyDown();
+            }
+        }
+    }
+    
+    /**
+     * Handle a device's dedicated Push-To-Talk intent via a BroadcastRecevier.
+     * @author DarK_St3alth
+     * @see MumlaActivity.onKeyUp
+     */
+    public class onPttUp extends BroadcastReceiver {
+        public onPttUp() {}
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("android.intent.action.PTT.up")
+            		|| intent.getAction().equals("com.sonim.intent.action.PTT_KEY_UP")
+            		|| intent.getAction().equals("com.TMZP.Main.PTTUp"))) {
+                mService.onTalkKeyUp();
+            }
+        }
+    }
+    
+    /**
+     * Handle a device's dedicated 'SOS' or 'Emergency' intent via a BroadcastRecevier.
+     * @author DarK_St3alth
+     * @see MumlaActivity.onKeyDown
+     * @implNote Does not have a complete implementation.
+     */
+    public class onEmergencyDown extends BroadcastReceiver {
+        public onEmergencyDown() {}
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("com.sonim.intent.action.SOS_KEY_DOWN")
+            		|| intent.getAction().equals("com.TMZP.Main.SOSDown"))) {
+            	mService.onEmergencyKeyDown();
+            }
+        }
+    }
+    
+    /**
+     * Handle a device's dedicated 'SOS' or 'Emergency' intent via a BroadcastRecevier.
+     * @author DarK_St3alth
+     * @see MumlaActivity.onKeyUp
+     * @implNote Does not have a complete implementation.
+     */
+    public class onEmergencyUp extends BroadcastReceiver {
+        public onEmergencyUp() {}
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("com.sonim.intent.action.SOS_KEY_UP")
+            		|| intent.getAction().equals("com.TMZP.Main.SOSUp"))) {
+            	mService.onEmergencyKeyUp();
+            }
+        }
+    }
+    
+    /**
+     * Handle Samsung's XCover/Top key intent via a BroadcastRecevier.
+     * @author DarK_St3alth
+     * @implNote Initial revision, might not require Samsung's SDK, but likely requires app to have a Knox license?
+     */
+    public class onSamsungXCover extends BroadcastReceiver {
+        public onSamsungXCover() {}
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("com.samsung.android.knox.intent.action.HARD_KEY_REPORT"))) {
+            	/** Determine what action was performed.
+            	 * https://docs.samsungknox.com/dev/knox-sdk/hardware-key-remapping-isv.htm
+            	 * Public static final int KEYCODE_PTT					1015 (0x000003f7)
+            	 * Public static final int KEYCODE_EMERGENCY 			1079 (0x00000437)
+            	 * Public static final int KEY_ACTION_DOWN (key press) 	1 (0x00000001)
+            	 * Public static final int KEY_ACTION_UP (key release) 	2 (0x00000002)
+            	 */
+            	
+            	// TODO These are likely incorrect as I lack access to Samsung's full SDK.
+            	int keyCode = intent.getIntExtra("KEY_CODE", 0);
+				int keyReportType = intent.getIntExtra("KEY_REPORT_TYPE", 0);
+				
+				if (keyCode == KEYCODE_PTT && keyReportType == 1) {
+					mService.onTalkKeyUp();
+				} else if (keyCode == KEYCODE_PTT && keyReportType == 2) {
+					mService.onTalkKeyDown();
+				} else if (keyCode == KEYCODE_EMERGENCY && keyReportType == 1) {
+					mService.onEmergencyKeyUp();
+				} else if (keyCode == KEYCODE_EMERGENCY && keyReportType == 2) {
+					mService.onEmergencyKeyDown();
+				}
+            }
+        }
+    }
+    
     @Override
     public void onBackPressed() {
         if(mService != null && mService.isConnected()) {
