@@ -1,3 +1,8 @@
+# You can override the included template(s) by including variable overrides
+# See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+
 image: quite/android-sdk-ndk:latest
 
 variables:
@@ -5,20 +10,21 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
 include:
-  - template: Security/License-Scanning.gitlab-ci.yml
-  - template: Security/SAST.gitlab-ci.yml
+- template: Security/License-Scanning.gitlab-ci.yml
+- template: Security/SAST.gitlab-ci.yml
 
 before_script:
   - export GRADLE_USER_HOME=$(pwd)/.gradle
   - chmod +x ./gradlew
 
 cache:
-  key: ${CI_PROJECT_ID}
+  key: "${CI_PROJECT_ID}"
   paths:
-  - .gradle/
+  - ".gradle/"
 
 stages:
   - build
+  - test
 
 # lintDebug:
 #   stage: build
@@ -29,9 +35,9 @@ assembleDebug:
   stage: build
   script:
     - pushd libraries/humla/libs/humla-spongycastle
-    - ../../gradlew jar
+    - "../../gradlew jar"
     - popd
-    - ./gradlew assembleDebug
+    - "./gradlew assembleDebug"
   artifacts:
     paths:
     - app/build/outputs/apk/
@@ -46,3 +52,9 @@ assembleDebug:
 #   stage: test
 #   script:
 #     - ./gradlew -Pci --console=plain jacocoTestReport coveralls
+
+sast:
+  variables:
+    SAST_EXCLUDED_ANALYZERS: bandit, brakeman, eslint, flawfinder, gosec, kubesec,
+      nodejs-scan, phpcs-security-audit, pmd-apex, security-code-scan, sobelow
+  stage: test
