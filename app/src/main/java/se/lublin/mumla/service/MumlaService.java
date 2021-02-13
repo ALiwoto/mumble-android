@@ -602,13 +602,12 @@ public class MumlaService extends HumlaService implements
             }
         }
     }
-    
+
     /**
      * Called when a user presses a device's 'SOS' or 'Emergency' key.
      * @author DarK_St3alth
      * @implNote Currently only acts like a PTT key...
      */
-    @Override
     public void onEmergencyKeyDown() {
         if(isConnectionEstablished()
                 && Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
@@ -617,13 +616,12 @@ public class MumlaService extends HumlaService implements
             }
         }
     }
-    
+
     /**
      * Called when a user releases a device's 'SOS' or 'Emergency' key.
      * @author DarK_St3alth
      * @implNote Currently only acts like a PTT key...
      */
-    @Override
     public void onEmergencyKeyUp() {
         if(isConnectionEstablished()
                 && Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
