@@ -38,6 +38,8 @@ assembleDebug:
     - "../../gradlew jar"
     - popd
     - "./gradlew assembleDebug"
+    - "/run.sh analyze ."
+    - "/analyzer run"
   artifacts:
     paths:
     - app/build/outputs/apk/
