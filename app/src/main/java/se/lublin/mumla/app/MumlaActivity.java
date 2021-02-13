@@ -558,7 +558,8 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         public void onReceive(Context context, Intent intent) {
             if (mService != null && (intent.getAction().equals("com.sonim.intent.action.SOS_KEY_DOWN")
             		|| intent.getAction().equals("com.TMZP.Main.SOSDown"))) {
-            	mService.onEmergencyKeyDown();
+				// Not functional yet.
+            	//mService.onEmergencyKeyDown();
             }
         }
     }
@@ -575,7 +576,8 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         public void onReceive(Context context, Intent intent) {
             if (mService != null && (intent.getAction().equals("com.sonim.intent.action.SOS_KEY_UP")
             		|| intent.getAction().equals("com.TMZP.Main.SOSUp"))) {
-            	mService.onEmergencyKeyUp();
+				// Not functional yet.
+            	//mService.onEmergencyKeyUp();
             }
         }
     }
