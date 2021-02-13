@@ -22,8 +22,10 @@ public interface IMumlaService extends IHumlaService {
 
     void onTalkKeyUp();
 
+	@Override
 	void onEmergencyKeyDown();
 
+	@Override
 	void onEmergengyKeyUp();
 
     List<IChatMessage> getMessageLog();
