@@ -466,7 +466,7 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         }
 
         public void onReceive(Context context, Intent intent) {
-            if (mService != null && (intent.getAction().equals("android.intent.action.PTT.down"))) {
+            if (mService != null) {
                 mService.onTalkKeyDown();
 
             }
@@ -477,7 +477,7 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         }
 
         public void onReceive(Context context, Intent intent) {
-            if (mService != null && (intent.getAction().equals("android.intent.action.PTT.up"))) {
+            if (mService != null) {
 
                 mService.onTalkKeyUp();
 
