@@ -19,9 +19,12 @@ package se.lublin.mumla.app;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -111,6 +114,12 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
      * If specified, the provided integer drawer fragment ID is shown when the activity is created.
      */
     public static final String EXTRA_DRAWER_FRAGMENT = "drawer_fragment";
+
+    /**
+     * Add BroadcastReceiver
+     */
+    public BroadcastReceiver ptthwdown = new pttdown();
+    public BroadcastReceiver ptthwup = new pttup();
 
     private IMumlaService mService;
     private MumlaDatabase mDatabase;
@@ -267,6 +276,8 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
+        registerReceiver(this.ptthwdown, new IntentFilter("android.intent.action.PTT.down"));
+        registerReceiver(this.ptthwup, new IntentFilter("android.intent.action.PTT.up"));
 
         mDatabase = new MumlaSQLiteDatabase(this); // TODO add support for cloud storage
         mDatabase.open();
@@ -448,6 +459,30 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
             return true;
         }
         return super.onKeyUp(keyCode, event);
+    }
+
+    public class pttdown extends BroadcastReceiver {
+        public pttdown() {
+        }
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("android.intent.action.PTT.down"))) {
+                mService.onTalkKeyDown();
+
+            }
+        }
+    }
+    public class pttup extends BroadcastReceiver {
+        public pttup() {
+        }
+
+        public void onReceive(Context context, Intent intent) {
+            if (mService != null && (intent.getAction().equals("android.intent.action.PTT.up"))) {
+
+                mService.onTalkKeyUp();
+
+            }
+        }
     }
 
     @Override
