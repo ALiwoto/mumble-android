@@ -278,6 +278,11 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         preferences.registerOnSharedPreferenceChangeListener(this);
         registerReceiver(this.ptthwdown, new IntentFilter("android.intent.action.PTT.down"));
         registerReceiver(this.ptthwup, new IntentFilter("android.intent.action.PTT.up"));
+        registerReceiver(this.ptthwdown, new IntentFilter("com.sonim.intent.action.PTT_KEY_DOWN"));
+        registerReceiver(this.ptthwup, new IntentFilter("com.sonim.intent.action.PTT_KEY_UP"));
+        registerReceiver(this.ptthwdown, new IntentFilter("com.runbo.ptt.key.down"));
+        registerReceiver(this.ptthwup, new IntentFilter("com.runbo.ptt.key.up"));
+
 
         mDatabase = new MumlaSQLiteDatabase(this); // TODO add support for cloud storage
         mDatabase.open();
