@@ -1,3 +1,8 @@
+# You can override the included template(s) by including variable overrides
+# See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
+
 image: quite/android-sdk-ndk:latest
 
 variables:
@@ -9,12 +14,13 @@ before_script:
   - chmod +x ./gradlew
 
 cache:
-  key: ${CI_PROJECT_ID}
+  key: "${CI_PROJECT_ID}"
   paths:
-  - .gradle/
+  - ".gradle/"
 
 stages:
   - build
+  - test
 
 # lintDebug:
 #   stage: build
@@ -25,9 +31,9 @@ assembleDebug:
   stage: build
   script:
     - pushd libraries/humla/libs/humla-spongycastle
-    - ../../gradlew jar
+    - "../../gradlew jar"
     - popd
-    - ./gradlew assembleDebug
+    - "./gradlew assembleDebug"
   artifacts:
     paths:
     - app/build/outputs/apk/

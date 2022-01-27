@@ -603,6 +603,36 @@ public class MumlaService extends HumlaService implements
         }
     }
 
+    /**
+     * Called when a user presses a device's 'SOS' or 'Emergency' key.
+     * @author DarK_St3alth
+     * @implNote Currently only acts like a PTT key...
+     */
+    //public void onEmergencyKeyDown() {
+    //    if(isConnectionEstablished()
+    //            && Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
+    //        if (!mSettings.isPushToTalkToggle() && !isTalking()) {
+    //            setTalkingState(true); // Start talking
+    //        }
+    //    }
+    //}
+
+    /**
+     * Called when a user releases a device's 'SOS' or 'Emergency' key.
+     * @author DarK_St3alth
+     * @implNote Currently only acts like a PTT key...
+     */
+    //public void onEmergencyKeyUp() {
+    //    if(isConnectionEstablished()
+    //            && Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
+    //        if (mSettings.isPushToTalkToggle()) {
+    //            setTalkingState(!isTalking()); // Toggle talk state
+    //        } else if (isTalking()) {
+    //            setTalkingState(false); // Stop talking
+    //        }
+    //    }
+    //}
+
     @Override
     public List<IChatMessage> getMessageLog() {
         return Collections.unmodifiableList(mMessageLog);
