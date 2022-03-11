@@ -18,7 +18,9 @@
 package se.lublin.mumla.channel;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -42,6 +44,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -125,7 +128,6 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
     private EditText mChatTextEdit;
     private ImageButton mSendButton;
     private ChatTargetProvider mTargetProvider;
-    private String mMessageBuffer;
     ActivityResultLauncher<String> imagePicker
             = registerForActivityResult(new ActivityResultContracts.GetContent(), this::onImagePicked);
 
@@ -149,11 +151,6 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
     public void onResume() {
         super.onResume();
         mTargetProvider.registerChatTargetListener(this);
-
-        if (mMessageBuffer != null) {
-            sendMessage(mMessageBuffer);
-            mMessageBuffer = null;
-        }
     }
 
     @Override
@@ -260,7 +257,6 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
         if (getService() == null || !getService().isConnected()) {
             return;
         }
-        int maxSize = getService().HumlaSession().getServerSettings().getImageMessageLength();
 
         // We don't fail on errors when getting orientation
         boolean flipped = false;
@@ -295,6 +291,28 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
             Log.w(TAG, "decode to bitmap failed");
             return;
         }
+
+        ImageView image = new ImageView(requireContext());
+        image.setImageBitmap(bitmap);
+        image.setAdjustViewBounds(true);
+        image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        image.setMaxHeight(Resources.getSystem().getDisplayMetrics().heightPixels - 500);
+
+        boolean finalFlipped = flipped;
+        int finalRotationDeg = rotationDeg;
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
+                .setMessage("Send?")
+                .setPositiveButton("Confirm", (dialog, which) -> {
+                    dialog.dismiss();
+                    onImageConfirmed(finalFlipped, finalRotationDeg, bitmap);
+                })
+                .setNegativeButton("Cancel",  (dialog, which) -> dialog.dismiss())
+                .setView(image);
+        builder.create().show();
+    }
+
+    private void onImageConfirmed(boolean flipped, int rotationDeg, Bitmap bitmap){
+        int maxSize = getService().HumlaSession().getServerSettings().getImageMessageLength();
 
         if (flipped || rotationDeg > 0) {
             Matrix matrix = new Matrix();
@@ -338,7 +356,7 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
 
         String imageStr = Base64.encodeToString(compressed, Base64.NO_WRAP);
         String encoded = URLEncoder.encode(imageStr);
-        mMessageBuffer = "<img src=\"data:image/jpeg;base64," + encoded + "\"/>";
+        sendMessage("<img src=\"data:image/jpeg;base64," + encoded + "\"/>");
     }
 
     /**
