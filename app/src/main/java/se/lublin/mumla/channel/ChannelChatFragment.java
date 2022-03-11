@@ -296,23 +296,7 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
         image.setImageBitmap(bitmap);
         image.setAdjustViewBounds(true);
         image.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        image.setMaxHeight(Resources.getSystem().getDisplayMetrics().heightPixels - 500);
-
-        boolean finalFlipped = flipped;
-        int finalRotationDeg = rotationDeg;
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
-                .setMessage("Send?")
-                .setPositiveButton("Confirm", (dialog, which) -> {
-                    dialog.dismiss();
-                    onImageConfirmed(finalFlipped, finalRotationDeg, bitmap);
-                })
-                .setNegativeButton("Cancel",  (dialog, which) -> dialog.dismiss())
-                .setView(image);
-        builder.create().show();
-    }
-
-    private void onImageConfirmed(boolean flipped, int rotationDeg, Bitmap bitmap){
-        int maxSize = getService().HumlaSession().getServerSettings().getImageMessageLength();
+        image.setMaxHeight(Resources.getSystem().getDisplayMetrics().heightPixels / 3);
 
         if (flipped || rotationDeg > 0) {
             Matrix matrix = new Matrix();
@@ -328,6 +312,20 @@ public class ChannelChatFragment extends HumlaServiceFragment implements ChatTar
         }
 
         Bitmap resized = BitmapUtils.resizeKeepingAspect(bitmap, 600, 400);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
+                .setMessage(R.string.image_confirm_send)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    dialog.dismiss();
+                    onImageConfirmed(resized);
+                })
+                .setNegativeButton(R.string.cancel,  (dialog, which) -> dialog.dismiss())
+                .setView(image);
+        builder.create().show();
+    }
+
+    private void onImageConfirmed( Bitmap resized){
+        int maxSize = getService().HumlaSession().getServerSettings().getImageMessageLength();
 
         // Try to resize image until it fits
         int quality = 97;
