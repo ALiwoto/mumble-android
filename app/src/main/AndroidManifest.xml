@@ -101,6 +101,19 @@
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
 
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.PTT.down"/>
+                <action android:name="android.intent.action.PTT.up"/>
+                <action android:name="com.runbo.ptt.key.down"/>
+                <action android:name="com.runbo.ptt.key.up"/>
+                <action android:name="com.sonim.intent.action.PTT_KEY_DOWN"/>
+                <action android:name="com.sonim.intent.action.PTT_KEY_UP"/>
+                <action android:name="com.honeywell.intent.action.AUDIO_PTT_STATE_CHANGE"/>
+                <action android:name="com.kodiak.intent.action.PTT_BUTTON"/>
+                <action android:name="com.kyocera.android.intent.action.PTT_BUTTON"/>
+                <action android:name="com.kyocera.intent.action.PTT_BUTTON"/>
+            </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />

@@ -19,7 +19,9 @@ package se.lublin.mumla.app;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -104,7 +106,7 @@ import se.lublin.mumla.util.MumlaTrustStore;
 public class MumlaActivity extends AppCompatActivity implements ListView.OnItemClickListener,
         FavouriteServerListFragment.ServerConnectHandler, HumlaServiceProvider, DatabaseProvider,
         SharedPreferences.OnSharedPreferenceChangeListener, DrawerAdapter.DrawerDataProvider,
-        ServerEditFragment.ServerEditListener {
+        ServerEditFragment.ServerEditListener, PttBroadcastReceiver.PttActionProvider {
     private static final String TAG = MumlaActivity.class.getName();
 
     /**
@@ -127,6 +129,8 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     private ProgressDialog mConnectingDialog;
     private AlertDialog mErrorDialog;
     private AlertDialog.Builder mDisconnectPromptBuilder;
+
+    private PttBroadcastReceiver mPttReceiver;
 
     /** List of fragments to be notified about service state changes. */
     private List<HumlaServiceFragment> mServiceFragments = new ArrayList<HumlaServiceFragment>();
@@ -344,6 +348,10 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         setVolumeControlStream(mSettings.isHandsetMode() ?
                 AudioManager.STREAM_VOICE_CALL : AudioManager.STREAM_MUSIC);
 
+        mPttReceiver = new PttBroadcastReceiver(this);
+
+        setupPttReceiver();
+
         if (mSettings.isFirstRun()) {
             showFirstRunGuide();
         }
@@ -430,6 +438,38 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    private void setupPttReceiver() {
+        if (Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
+            mPttReceiver.register(this);
+        }
+    }
+
+    @Override
+    public void pttDown() {
+        if (mService != null) {
+            mService.onTalkKeyDown();
+        }
+    }
+
+    @Override
+    public void pttUp() {
+        if (mService != null) {
+            mService.onTalkKeyUp();
+        }
+    }
+
+    @Override
+    public void pttToggle() {
+        if (mService != null) {
+            IHumlaSession session = mService.HumlaSession();
+            if (session.isTalking()) {
+                mService.onTalkKeyUp();
+            } else {
+                mService.onTalkKeyDown();
+            }
+        }
     }
 
     @Override

@@ -54,6 +54,7 @@ import se.lublin.mumla.R;
 import se.lublin.mumla.Settings;
 import se.lublin.mumla.service.ipc.TalkBroadcastReceiver;
 import se.lublin.mumla.util.HtmlUtils;
+import se.lublin.mumla.util.SoundUtils;
 
 /**
  * An extension of the Humla service with some added Mumla-exclusive non-standard Mumble features.
@@ -259,15 +260,26 @@ public class MumlaService extends HumlaService implements
             }
         }
 
+        private void playSoundResource(int resId) {
+            try {
+                SoundUtils.playSoundResource(MumlaService.this, resId);
+            } catch (Exception e) {
+                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+                audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, -1);
+            }
+        }
+
         @Override
         public void onUserTalkStateUpdated(IUser user) {
-            if (isConnectionEstablished() &&
+            if (mPTTSoundEnabled && isConnectionEstablished() &&
                     getSessionId() == user.getSession() &&
-                    getTransmitMode() == Constants.TRANSMIT_PUSH_TO_TALK &&
-                    user.getTalkState() == TalkState.TALKING &&
-                    mPTTSoundEnabled) {
-                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-                audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, -1);
+                    getTransmitMode() == Constants.TRANSMIT_PUSH_TO_TALK) {
+                if (user.getTalkState() == TalkState.TALKING) {
+                    playSoundResource(R.raw.sound_ptt_down);
+                } else {
+                    playSoundResource(R.raw.sound_ptt_up);
+                }
             }
         }
     };
