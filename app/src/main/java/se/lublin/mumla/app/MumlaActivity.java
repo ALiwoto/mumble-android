@@ -450,10 +450,12 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     }
 
     private void pttPlayErrorTone() {
-        try {
-            SoundUtils.playSoundResource(this, R.raw.sound_ptt_error);
-        } catch (Exception e) {
-            // Don't worry about doing anything...
+        if (mSettings.isPttSoundEnabled()) {
+            try {
+                SoundUtils.playSoundResource(this, R.raw.sound_ptt_error);
+            } catch (Exception e) {
+                // Don't worry about doing anything...
+            }
         }
     }
 
