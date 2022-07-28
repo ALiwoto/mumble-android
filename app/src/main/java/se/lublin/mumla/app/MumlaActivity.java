@@ -470,10 +470,8 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     @Override
     public void pttUp() {
         Log.d(TAG, "pttUp()");
-        if (mService != null && mService.isConnected()) {
+        if (mService != null) {
             mService.onTalkKeyUp();
-        } else {
-            pttPlayErrorTone();
         }
     }
 
@@ -509,13 +507,8 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (mService != null && keyCode == mSettings.getPushToTalkKey()) {
-            if (mService.isConnected()) {
-                mService.onTalkKeyUp();
-                return true;
-            } else {
-                pttPlayErrorTone();
-                return false;
-            }
+            mService.onTalkKeyUp();
+            return true;
         }
         return super.onKeyUp(keyCode, event);
     }
