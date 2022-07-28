@@ -56,7 +56,11 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
     }
 
     public void unregister(Context context) {
-        context.unregisterReceiver(this);
+        try {
+            context.unregisterReceiver(this);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -102,6 +102,7 @@ import se.lublin.mumla.service.MumlaService;
 import se.lublin.mumla.util.HumlaServiceFragment;
 import se.lublin.mumla.util.HumlaServiceProvider;
 import se.lublin.mumla.util.MumlaTrustStore;
+import se.lublin.mumla.util.SoundUtils;
 
 public class MumlaActivity extends AppCompatActivity implements ListView.OnItemClickListener,
         FavouriteServerListFragment.ServerConnectHandler, HumlaServiceProvider, DatabaseProvider,
@@ -441,42 +442,66 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     }
 
     private void setupPttReceiver() {
+        mPttReceiver.unregister(this);
+
         if (Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
             mPttReceiver.register(this);
         }
     }
 
+    private void pttPlayErrorTone() {
+        try {
+            SoundUtils.playSoundResource(this, R.raw.sound_ptt_error);
+        } catch (Exception e) {
+            // Don't worry about doing anything...
+        }
+    }
+
     @Override
     public void pttDown() {
-        if (mService != null) {
+        Log.d(TAG, "pttDown()");
+        if (mService != null && mService.isConnected()) {
             mService.onTalkKeyDown();
+        } else {
+            pttPlayErrorTone();
         }
     }
 
     @Override
     public void pttUp() {
-        if (mService != null) {
+        Log.d(TAG, "pttUp()");
+        if (mService != null && mService.isConnected()) {
             mService.onTalkKeyUp();
+        } else {
+            pttPlayErrorTone();
         }
     }
 
     @Override
     public void pttToggle() {
-        if (mService != null) {
+        Log.d(TAG, "pttToggle()");
+        if (mService != null && mService.isConnected()) {
             IHumlaSession session = mService.HumlaSession();
             if (session.isTalking()) {
                 mService.onTalkKeyUp();
             } else {
                 mService.onTalkKeyDown();
             }
+        } else {
+            pttPlayErrorTone();
         }
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (mService != null && keyCode == mSettings.getPushToTalkKey()) {
-            mService.onTalkKeyDown();
-            return true;
+            if (mService.isConnected()) {
+                mService.onTalkKeyDown();
+                return true;
+            } else {
+                pttPlayErrorTone();
+                return false;
+            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -484,8 +509,13 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (mService != null && keyCode == mSettings.getPushToTalkKey()) {
-            mService.onTalkKeyUp();
-            return true;
+            if (mService.isConnected()) {
+                mService.onTalkKeyUp();
+                return true;
+            } else {
+                pttPlayErrorTone();
+                return false;
+            }
         }
         return super.onKeyUp(keyCode, event);
     }
