@@ -25,19 +25,28 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
             "android.intent.action.PTT.pressed",
             "com.runbo.ptt.key.down",
             "com.sonim.intent.action.PTT_KEY_DOWN"
-    };
+        };
     public static final String[] PTT_UP_INTENTS = {
             "android.intent.action.PTT.up",
             "android.intent.action.PTT.released",
             "com.runbo.ptt.key.up",
             "com.sonim.intent.action.PTT_KEY_UP"
-    };
+        };
     public static final String[] PTT_TOGGLE_INTENTS = {
             "com.honeywell.intent.action.AUDIO_PTT_STATE_CHANGE",
             "com.kodiak.intent.action.PTT_BUTTON",
             "com.kyocera.android.intent.action.PTT_BUTTON",
             "com.kyocera.intent.action.PTT_BUTTON",
             "com.symbol.button.L2"
+        };
+    public static final String[] PTT_SOS_INTENTS = {
+            "android.intent.action.PTT.SOS"
+        };
+    public static final String[] PTT_GROUP_PREV_INTENTS = {
+            "android.intent.action.TALK_GROUP.prev"
+    };
+    public static final String[] PTT_GROUP_NEXT_INTENTS = {
+            "android.intent.action.TALK_GROUP.next"
     };
 
     PttActionProvider mPttProvider;
@@ -56,6 +65,17 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
         for (String intent: PTT_TOGGLE_INTENTS) {
             context.registerReceiver(this, new IntentFilter(intent));
         }
+        /*
+        for (String intent: PTT_SOS_INTENTS) {
+            context.registerReceiver(this, new IntentFilter(intent));
+        }
+        for (String intent: PTT_GROUP_PREV_INTENTS) {
+            context.registerReceiver(this, new IntentFilter(intent));
+        }
+        for (String intent: PTT_GROUP_NEXT_INTENTS) {
+            context.registerReceiver(this, new IntentFilter(intent));
+        }
+        */
     }
 
     public void unregister(Context context) {
@@ -90,7 +110,10 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
             } else {
                 mPttProvider.pttToggle();
             }
-        } else {
+        } /*else if (Arrays.asList(PTT_SOS_INTENTS).contains(action)) {
+        } else if (Arrays.asList(PTT_GROUP_PREV_INTENTS).contains(action)) {
+        } else if (Arrays.asList(PTT_GROUP_NEXT_INTENTS).contains(action)) {
+        }*/ else {
             Log.d(TAG, "Unhandled PTT action: " + action);
         }
     }
