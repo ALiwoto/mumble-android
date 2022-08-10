@@ -22,11 +22,13 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
 
     public static final String[] PTT_DOWN_INTENTS = {
             "android.intent.action.PTT.down",
+            "android.intent.action.PTT.pressed",
             "com.runbo.ptt.key.down",
             "com.sonim.intent.action.PTT_KEY_DOWN"
     };
     public static final String[] PTT_UP_INTENTS = {
             "android.intent.action.PTT.up",
+            "android.intent.action.PTT.released",
             "com.runbo.ptt.key.up",
             "com.sonim.intent.action.PTT_KEY_UP"
     };
@@ -34,7 +36,8 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
             "com.honeywell.intent.action.AUDIO_PTT_STATE_CHANGE",
             "com.kodiak.intent.action.PTT_BUTTON",
             "com.kyocera.android.intent.action.PTT_BUTTON",
-            "com.kyocera.intent.action.PTT_BUTTON"
+            "com.kyocera.intent.action.PTT_BUTTON",
+            "com.symbol.button.L2"
     };
 
     PttActionProvider mPttProvider;

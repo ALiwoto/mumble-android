@@ -8,13 +8,15 @@ import android.media.MediaPlayer;
 import java.io.IOException;
 
 public class SoundUtils {
+    private static final float DEFAULT_VOL = 1.0f;
+
     /**
      * Play a sound resource based on resource ID.
      * @param context The application context containing the resource
      * @param resId The resource ID to play
      */
     public static void playSoundResource(Context context, int resId) throws IOException {
-        playSoundResource(context, resId, 0.3f, 0.3f);
+        playSoundResource(context, resId, DEFAULT_VOL, DEFAULT_VOL);
     }
 
     /**
@@ -33,6 +35,11 @@ public class SoundUtils {
                 @Override
                 public void onCompletion(MediaPlayer mp){
                     mp.release();
+                    try {
+                        resFd.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             };
             MediaPlayer.OnPreparedListener preparedListener = new MediaPlayer.OnPreparedListener() {
