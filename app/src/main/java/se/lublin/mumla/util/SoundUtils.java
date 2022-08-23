@@ -8,6 +8,8 @@ import android.media.MediaPlayer;
 import java.io.IOException;
 
 public class SoundUtils {
+    private static final String TAG = SoundUtils.class.getName();
+
     private static final float DEFAULT_VOL = 1.0f;
 
     /**

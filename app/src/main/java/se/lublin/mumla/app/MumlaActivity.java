@@ -107,7 +107,7 @@ import se.lublin.mumla.util.SoundUtils;
 public class MumlaActivity extends AppCompatActivity implements ListView.OnItemClickListener,
         FavouriteServerListFragment.ServerConnectHandler, HumlaServiceProvider, DatabaseProvider,
         SharedPreferences.OnSharedPreferenceChangeListener, DrawerAdapter.DrawerDataProvider,
-        ServerEditFragment.ServerEditListener, PttBroadcastReceiver.PttActionProvider {
+        ServerEditFragment.ServerEditListener {
     private static final String TAG = MumlaActivity.class.getName();
 
     /**
@@ -130,8 +130,6 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
     private ProgressDialog mConnectingDialog;
     private AlertDialog mErrorDialog;
     private AlertDialog.Builder mDisconnectPromptBuilder;
-
-    private PttBroadcastReceiver mPttReceiver;
 
     /** List of fragments to be notified about service state changes. */
     private List<HumlaServiceFragment> mServiceFragments = new ArrayList<HumlaServiceFragment>();
@@ -349,10 +347,6 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         setVolumeControlStream(mSettings.isHandsetMode() ?
                 AudioManager.STREAM_VOICE_CALL : AudioManager.STREAM_MUSIC);
 
-        mPttReceiver = new PttBroadcastReceiver(this);
-
-        setupPttReceiver();
-
         if (mSettings.isFirstRun()) {
             showFirstRunGuide();
         }
@@ -441,14 +435,6 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    private void setupPttReceiver() {
-        mPttReceiver.unregister(this);
-
-        if (Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
-            mPttReceiver.register(this);
-        }
-    }
-
     private void pttPlayErrorTone() {
         if (mSettings.isPttSoundEnabled()) {
             try {
@@ -456,39 +442,6 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
             } catch (Exception e) {
                 // Don't worry about doing anything...
             }
-        }
-    }
-
-    @Override
-    public void pttDown() {
-        Log.d(TAG, "pttDown()");
-        if (mService != null && mService.isConnected()) {
-            mService.onTalkKeyDown();
-        } else {
-            pttPlayErrorTone();
-        }
-    }
-
-    @Override
-    public void pttUp() {
-        Log.d(TAG, "pttUp()");
-        if (mService != null) {
-            mService.onTalkKeyUp();
-        }
-    }
-
-    @Override
-    public void pttToggle() {
-        Log.d(TAG, "pttToggle()");
-        if (mService != null && mService.isConnected()) {
-            IHumlaSession session = mService.HumlaSession();
-            if (session.isTalking()) {
-                mService.onTalkKeyUp();
-            } else {
-                mService.onTalkKeyDown();
-            }
-        } else {
-            pttPlayErrorTone();
         }
     }
 
@@ -876,7 +829,7 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(Settings.PREF_THEME.equals(key)) {
+        if (Settings.PREF_THEME.equals(key)) {
             // Recreate activity when theme is changed
             recreate();
         } else if (Settings.PREF_STAY_AWAKE.equals(key)) {

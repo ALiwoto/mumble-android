@@ -1,4 +1,4 @@
-package se.lublin.mumla.app;
+package se.lublin.mumla.service.ipc;
 
 
 import android.content.BroadcastReceiver;
@@ -81,8 +81,8 @@ public class PttBroadcastReceiver extends BroadcastReceiver {
     public void unregister(Context context) {
         try {
             context.unregisterReceiver(this);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (IllegalArgumentException ignored) {
+            //e.printStackTrace();
         }
     }
 

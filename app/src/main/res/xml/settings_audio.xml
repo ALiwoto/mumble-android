@@ -40,6 +40,12 @@
         android:defaultValue="100"
         android:text="%"/>
 
+    <CheckBoxPreference
+        android:key="emulate_squelch"
+        android:title="@string/emulateSquelch"
+        android:summary="@string/emulateSquelchSum"
+        android:defaultValue="false"/>
+
     <PreferenceCategory android:title="@string/voiceActivitySettings"
         android:key="vad_settings">
         <se.lublin.mumla.preference.SeekBarDialogPreference

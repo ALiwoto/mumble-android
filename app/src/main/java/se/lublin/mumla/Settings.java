@@ -161,6 +161,9 @@ public class Settings {
     public static final String PREF_PTT_SOUND = "ptt_sound";
     public static final boolean DEFAULT_PTT_SOUND = false;
 
+    public static final String PREF_EMULATE_SQUELCH = "emulate_squelch";
+    public static final boolean DEFAULT_EMULATE_SQUELCH = false;
+
     public static final String PREF_PREPROCESSOR_ENABLED = "preprocessor_enabled";
     public static final boolean DEFAULT_PREPROCESSOR_ENABLED = true;
 
@@ -433,6 +436,10 @@ public class Settings {
 
     public boolean isPttSoundEnabled() {
         return preferences.getBoolean(PREF_PTT_SOUND, DEFAULT_PTT_SOUND);
+    }
+
+    public boolean isSquelchEnabled() {
+        return preferences.getBoolean(PREF_EMULATE_SQUELCH, DEFAULT_EMULATE_SQUELCH);
     }
 
     public boolean isPreprocessorEnabled() {
