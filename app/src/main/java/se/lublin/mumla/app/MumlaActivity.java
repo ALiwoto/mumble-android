@@ -19,7 +19,9 @@ package se.lublin.mumla.app;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -101,6 +103,7 @@ import se.lublin.mumla.service.MumlaService;
 import se.lublin.mumla.util.HumlaServiceFragment;
 import se.lublin.mumla.util.HumlaServiceProvider;
 import se.lublin.mumla.util.MumlaTrustStore;
+import se.lublin.mumla.util.SoundUtils;
 
 public class MumlaActivity extends AppCompatActivity implements ListView.OnItemClickListener,
         FavouriteServerListFragment.ServerConnectHandler, HumlaServiceProvider, DatabaseProvider,
@@ -435,11 +438,26 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+    private void pttPlayErrorTone() {
+        if (mSettings.isPttSoundEnabled()) {
+            try {
+                SoundUtils.playSoundResource(this, R.raw.sound_ptt_error);
+            } catch (Exception e) {
+                // Don't worry about doing anything...
+            }
+        }
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (mService != null && keyCode == mSettings.getPushToTalkKey()) {
-            mService.onTalkKeyDown();
-            return true;
+            if (mService.isConnected()) {
+                mService.onTalkKeyDown();
+                return true;
+            } else {
+                pttPlayErrorTone();
+                return false;
+            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -850,7 +868,7 @@ public class MumlaActivity extends AppCompatActivity implements ListView.OnItemC
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if(Settings.PREF_THEME.equals(key)) {
+        if (Settings.PREF_THEME.equals(key)) {
             // Recreate activity when theme is changed
             recreate();
         } else if (Settings.PREF_STAY_AWAKE.equals(key)) {

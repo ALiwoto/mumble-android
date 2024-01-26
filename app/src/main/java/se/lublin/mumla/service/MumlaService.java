@@ -43,6 +43,7 @@ import java.util.List;
 
 import se.lublin.humla.Constants;
 import se.lublin.humla.HumlaService;
+import se.lublin.humla.IHumlaSession;
 import se.lublin.humla.exception.AudioException;
 import se.lublin.humla.model.IMessage;
 import se.lublin.humla.model.IUser;
@@ -52,8 +53,10 @@ import se.lublin.humla.util.HumlaException;
 import se.lublin.humla.util.HumlaObserver;
 import se.lublin.mumla.R;
 import se.lublin.mumla.Settings;
+import se.lublin.mumla.service.ipc.PttBroadcastReceiver;
 import se.lublin.mumla.service.ipc.TalkBroadcastReceiver;
 import se.lublin.mumla.util.HtmlUtils;
+import se.lublin.mumla.util.SoundUtils;
 
 /**
  * An extension of the Humla service with some added Mumla-exclusive non-standard Mumble features.
@@ -62,7 +65,7 @@ import se.lublin.mumla.util.HtmlUtils;
 public class MumlaService extends HumlaService implements
         SharedPreferences.OnSharedPreferenceChangeListener,
         MumlaConnectionNotification.OnActionListener,
-        MumlaReconnectNotification.OnActionListener, IMumlaService {
+        MumlaReconnectNotification.OnActionListener, IMumlaService, PttBroadcastReceiver.PttActionProvider {
     private static final String TAG = MumlaService.class.getName();
 
     /** Undocumented constant that permits a proximity-sensing wake lock. */
@@ -80,6 +83,7 @@ public class MumlaService extends HumlaService implements
     private PowerManager.WakeLock mProximityLock;
     /** Play sound when push to talk key is pressed */
     private boolean mPTTSoundEnabled;
+    private boolean mEnableSquelch;
     /** Try to shorten spoken messages when using TTS */
     private boolean mShortTtsMessagesEnabled;
     /**
@@ -89,6 +93,8 @@ public class MumlaService extends HumlaService implements
     private boolean mErrorShown;
     private List<IChatMessage> mMessageLog;
     private boolean mSuppressNotifications;
+
+    private PttBroadcastReceiver mPttReceiver;
 
     private TextToSpeech mTTS;
     private TextToSpeech.OnInitListener mTTSInitListener = new TextToSpeech.OnInitListener() {
@@ -259,15 +265,26 @@ public class MumlaService extends HumlaService implements
             }
         }
 
+        private void playSoundResource(int resId) {
+            try {
+                SoundUtils.playSoundResource(MumlaService.this, resId);
+            } catch (Exception e) {
+                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+                audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, -1);
+            }
+        }
+
         @Override
         public void onUserTalkStateUpdated(IUser user) {
-            if (isConnectionEstablished() &&
+            if (mPTTSoundEnabled && isConnectionEstablished() &&
                     getSessionId() == user.getSession() &&
-                    getTransmitMode() == Constants.TRANSMIT_PUSH_TO_TALK &&
-                    user.getTalkState() == TalkState.TALKING &&
-                    mPTTSoundEnabled) {
-                AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-                audioManager.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD, -1);
+                    getTransmitMode() == Constants.TRANSMIT_PUSH_TO_TALK) {
+                if (user.getTalkState() == TalkState.TALKING) {
+                    playSoundResource(R.raw.sound_ptt_down);
+                } else if (mEnableSquelch) {
+                    playSoundResource(R.raw.sound_ptt_up);
+                }
             }
         }
     };
@@ -280,6 +297,7 @@ public class MumlaService extends HumlaService implements
         // Register for preference changes
         mSettings = Settings.getInstance(this);
         mPTTSoundEnabled = mSettings.isPttSoundEnabled();
+        mEnableSquelch = mSettings.isSquelchEnabled();
         mShortTtsMessagesEnabled = mSettings.isShortTextToSpeechMessagesEnabled();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(this);
@@ -300,6 +318,8 @@ public class MumlaService extends HumlaService implements
             mTTS = new TextToSpeech(this, mTTSInitListener);
 
         mTalkReceiver = new TalkBroadcastReceiver(this);
+
+        setupPttReceiver();
     }
 
     @Override
@@ -324,6 +344,10 @@ public class MumlaService extends HumlaService implements
             unregisterReceiver(mTalkReceiver);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+        }
+        if (mPttReceiver != null) {
+            mPttReceiver.unregister(this);
+            mPttReceiver = null;
         }
 
         unregisterObserver(mObserver);
@@ -405,6 +429,10 @@ public class MumlaService extends HumlaService implements
                 int inputMethod = mSettings.getHumlaInputMethod();
                 changedExtras.putInt(HumlaService.EXTRAS_TRANSMIT_MODE, inputMethod);
                 mChannelOverlay.setPushToTalkShown(inputMethod == Constants.TRANSMIT_PUSH_TO_TALK);
+
+                if (Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
+                    setupPttReceiver();
+                }
                 break;
             case Settings.PREF_HANDSET_MODE:
                 setProximitySensorOn(isConnectionEstablished() && mSettings.isHandsetMode());
@@ -443,6 +471,9 @@ public class MumlaService extends HumlaService implements
                 break;
             case Settings.PREF_PTT_SOUND:
                 mPTTSoundEnabled = mSettings.isPttSoundEnabled();
+                break;
+            case Settings.PREF_EMULATE_SQUELCH:
+                mEnableSquelch = mSettings.isSquelchEnabled();
                 break;
             case Settings.PREF_INPUT_QUALITY:
                 changedExtras.putInt(EXTRAS_INPUT_QUALITY, mSettings.getInputQuality());
@@ -581,6 +612,66 @@ public class MumlaService extends HumlaService implements
     @Override
     public boolean isErrorShown() {
         return mErrorShown;
+    }
+
+    private void setupPttReceiver() {
+        if (mPttReceiver != null) {
+            mPttReceiver.unregister(this);
+            mPttReceiver = null;
+        }
+
+        if (Settings.ARRAY_INPUT_METHOD_PTT.equals(mSettings.getInputMethod())) {
+            mPttReceiver = new PttBroadcastReceiver(this);
+
+            mPttReceiver.register(this);
+        }
+    }
+
+    private void pttPlayErrorTone() {
+        Log.v(TAG, "Play ptt error tone");
+        if (mSettings.isPttSoundEnabled()) {
+            try {
+                SoundUtils.playSoundResource(this, R.raw.sound_ptt_error);
+            } catch (Exception e) {
+                // Don't worry about doing anything...
+            }
+        }
+    }
+
+    @Override
+    public void pttDown() {
+        Log.d(TAG, "pttDown()");
+
+        if (isConnected()) {
+            onTalkKeyDown();
+        } else {
+            pttPlayErrorTone();
+        }
+    }
+
+    @Override
+    public void pttUp() {
+        Log.d(TAG, "pttUp()");
+
+        if (isConnected()) {
+            onTalkKeyUp();
+        }
+    }
+
+    @Override
+    public void pttToggle() {
+        Log.d(TAG, "pttToggle()");
+
+        if (isConnected()) {
+            IHumlaSession session = HumlaSession();
+            if (session.isTalking()) {
+                onTalkKeyUp();
+            } else {
+                onTalkKeyDown();
+            }
+        } else {
+            pttPlayErrorTone();
+        }
     }
 
     /**
